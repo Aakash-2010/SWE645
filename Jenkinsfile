@@ -8,6 +8,13 @@ pipeline {
     }
 
     stages {
+        stage('Checkout Code') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/desaimann37/SWE_645.git'
+            }
+        }
+        
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
@@ -24,13 +31,16 @@ pipeline {
             }
         }
 
-        stage('Update Kubernetes Deployment') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh """
-                sed -i 's|skye20/swe645:.*|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' nginx-deployment.yaml
-                kubectl apply -f nginx-deployment.yaml
-                kubectl apply -f nginx-service.yaml
-                """
+                script {
+                    sh """
+                    kubectl set image deployment/swe645-deployment \
+                    swe645-container=${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                    
+                    kubectl rollout status deployment/swe645-deployment
+                    """
+                }
             }
         }
     }
