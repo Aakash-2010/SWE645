@@ -27,7 +27,7 @@ pipeline {
         stage('Update Kubernetes Deployment') {
             steps {
                 sh """
-                sed -i 's|skye20/swe645:.*|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
+                sed -i 's|skye20/swe645:.*|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' nginx-deployment.yaml
                 kubectl apply -f nginx-deployment.yaml
                 kubectl apply -f nginx-service.yaml
                 """
