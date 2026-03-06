@@ -28,8 +28,8 @@ pipeline {
             steps {
                 sh """
                 sed -i 's|skye20/swe645:.*|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
+                kubectl apply -f nginx-deployment.yaml
+                kubectl apply -f nginx-service.yaml
                 """
             }
         }
