@@ -8,21 +8,9 @@ pipeline {
     }
 
     stages {
-
-        stage('Checkout Code') {
-            steps {
-                git branch: 'main',
-                    url: 'https://github.com/Aakash-2010/SWE645_EC2.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh """
-                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
-                    """
-                }
+                sh "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
 
@@ -30,9 +18,7 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub-pass', url: '') {
-                        sh """
-                        docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
-                        """
+                        sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
                     }
                 }
             }
@@ -40,13 +26,11 @@ pipeline {
 
         stage('Update Kubernetes Deployment') {
             steps {
-                script {
-                    sh """
-                    sed -i 's|skye20/swe645:latest|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
-                    kubectl apply -f k8s/deployment.yaml
-                    kubectl apply -f k8s/service.yaml
-                    """
-                }
+                sh """
+                sed -i 's|skye20/swe645:.*|${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}|g' k8s/deployment.yaml
+                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/service.yaml
+                """
             }
         }
     }
