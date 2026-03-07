@@ -3,21 +3,26 @@ pipeline {
 
     environment {
         DOCKERHUB_USER = "skye20"
-        IMAGE_NAME     = "swe645"
+        IMAGE_NAME     = "swe645-app"
         IMAGE_TAG      = "${BUILD_NUMBER}"
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
                     url: 'https://github.com/Aakash-2010/SWE645_EC2.git'
             }
         }
-        
+
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} ."
+                script {
+                    sh """
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG} .
+                    """
+                }
             }
         }
 
@@ -25,7 +30,9 @@ pipeline {
             steps {
                 script {
                     withDockerRegistry(credentialsId: 'dockerhub-pass', url: '') {
-                        sh "docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}"
+                        sh """
+                        docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:${IMAGE_TAG}
+                        """
                     }
                 }
             }
